@@ -13,9 +13,24 @@ class Evenement extends Model
 
     protected $fillable = ['titre', 'description', 'date_debut', 'date_fin', 'statut', 'limite_participants', 'participants_count'];
 
-    public function participants()
+/**
+     * Encoder l'ID de l'événement pour sécuriser l'URL
+     */
+    public function encodeId()
     {
-        return $this->hasMany(Participant::class);
+        return base64_encode($this->id);
     }
 
+    /**
+     * Décoder l'ID de l'événement à partir de l'URL sécurisée
+     */
+    public static function decodeId($hashedId)
+    {
+        return base64_decode($hashedId);
+    }
+
+    public function participants()
+    {
+        return $this->belongsToMany(User::class, 'participants');
+    }
 }

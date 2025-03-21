@@ -53,22 +53,32 @@ class EvenementController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        // Afficher un événement spécifique
-        $evenement = Evenement::findOrFail($id);
-        return view('evenements.show', compact('evenement'));
-    }
+    public function show(string $hashedId)
+{
+    // Décoder l'ID hashé en utilisant la méthode du modèle
+    $id = Evenement::decodeId($hashedId);
+
+    // Récupérer l'événement avec l'ID décodé
+    $evenement = Evenement::findOrFail($id);
+
+    return view('evenements.show', compact('evenement'));
+}
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        // Afficher le formulaire de modification d'événement
-        $evenement = Evenement::findOrFail($id);
-        return view('evenements.edit', compact('evenement'));
-    }
+    public function edit(string $hashedId)
+{
+    // Décoder l'ID hashé en utilisant la méthode du modèle
+    $id = Evenement::decodeId($hashedId);
+
+    // Récupérer l'événement avec l'ID décodé
+    $evenement = Evenement::findOrFail($id);
+
+    // Afficher le formulaire de modification
+    return view('evenements.edit', compact('evenement'));
+}
 
     /**
      * Update the specified resource in storage.
@@ -93,38 +103,39 @@ class EvenementController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-         // Supprimer l'événement du softDeletes
-         $evenement = Evenement::findOrFail($id);
-         $evenement->delete();
+    public function destroy(string $hashedId)
+{
+    // Décoder l'ID hashé en utilisant la méthode du modèle
+    $id = Evenement::decodeId($hashedId);
 
-         return redirect()->route('evenements.index')->with('success', 'Événement supprimé.');
-    }
+    // Trouver l'événement par ID et le supprimer
+    $evenement = Evenement::findOrFail($id);
+    $evenement->delete();
+
+    return redirect()->route('evenements.index')->with('success', 'Événement supprimé.');
+}
 
     public function showParticipants()
     {
         // Récupérer tous les événements avec leurs participants
-        $evenements = Evenement::with('participants.user')->get();
+        $evenements = Evenement::with('participants')->get();
 
         return view('evenements.participants', compact('evenements'));
     }
 
+    public function indexUtilisateur()
+    {
+        $utilisateurs = User::all(); // Récupération de tous les utilisateurs
+        return view('evenements.utilisateurs', compact('utilisateurs'));
+    }
 
+    public function evenementActif()
+    {
+        $evenements = Evenement::where('statut', 'actif')->get();
+        return view('evenements.evenement_actifs', compact('evenements'));
+    }
 
-public function indexUtilisateur()
-{
-    $utilisateurs = User::all(); // Récupération de tous les utilisateurs
-    return view('evenements.utilisateurs', compact('utilisateurs'));
-}
-
-public function evenementActif()
-{
-    $evenements = Evenement::where('statut', 'actif')->get();
-    return view('evenements.evenement_actifs', compact('evenements'));
-}
-
-public function evenementExpire()
+    public function evenementExpire()
     {
         $evenements = Evenement::where('statut', 'expiré')->get();
         return view('evenements.evenement_expire', compact('evenements'));
@@ -143,7 +154,6 @@ public function evenementExpire()
 
     // Vérifier si l'événement est actif et s'il reste des places
     if ($evenement->statut !== 'actif' || $evenement->participants_count >= $evenement->limite_participants) {
-        // Rediriger avec un message d'erreur si la limite est atteinte ou l'événement est inactif
         return redirect()->route('evenements.index')->with('error', 'Désolé, cet événement est complet ou inactif.');
     }
 
@@ -151,41 +161,62 @@ public function evenementExpire()
     $user = User::firstOrCreate(
         ['email' => $request->email],
         [
-            'nom' => $request->name,
-            'prenom' => $request->last_name,
-            'password' => bcrypt('password'), // Mot de passe par défaut
+            'name' => $request->name,
+            'last_name' => $request->last_name,
+            'password' => bcrypt('password'),
+            'role' => 'participant',
         ]
     );
+
+    // Vérifier si l'utilisateur est déjà inscrit à cet événement
+    $alreadyParticipating = $evenement->participants()->where('user_id', $user->id)->exists();
+
+    if ($alreadyParticipating) {
+        // Si déjà inscrit, ne pas envoyer d'email et ne pas créer de ticket
+        return redirect()->route('welcome')->with('error', 'Vous êtes déjà inscrit à cet événement.');
+    }
 
     // Ajouter le participant à l'événement
     $evenement->participants()->attach($user->id);
 
     // Mettre à jour le nombre de participants
-    $evenement->increment('participants_count'); // Incrémente de 1 le nombre de participants
+    $evenement->increment('participants_count');
 
-    // Créer un ticket unique pour l'utilisateur
-    $ticketCode = Str::random(20); // Générer un ticket unique
-    $ticket = Ticket::create([
-        'evenement_id' => $evenement->id,
-        'user_id' => $user->id,
-        'ticket_code' => $ticketCode,
-    ]);
+    // Vérifier une dernière fois avant d'envoyer l'email
+    $ticketExists = Ticket::where('evenement_id', $evenement->id)
+                          ->where('user_id', $user->id)
+                          ->exists();
 
-    // Envoyer un ticket par email
-    Mail::to($request->email)->send(new TicketMail($ticket, $evenement));
+    if (!$ticketExists) {
+        // Créer un ticket unique pour l'utilisateur
+        $ticketCode = Str::random(20); // Générer un ticket unique
+        $ticket = Ticket::create([
+            'evenement_id' => $evenement->id,
+            'user_id' => $user->id,
+            'ticket_code' => $ticketCode,
+        ]);
+
+        // Envoyer un ticket par email
+        Mail::to($request->email)->send(new TicketMail($ticket, $evenement, $user));
+    }
 
     // Rediriger avec un message de succès
-    return redirect()->route('evenements.show', $evenementId)->with('success', 'Vous êtes inscrit à l\'événement!');
+    return redirect()->route('welcome')->with('success', 'Vous êtes inscrit à l\'événement!');
 }
 
 
-public function allevents()
-{
-    // Récupérer tous les événements actifs
-    $evenements = Evenement::where('statut', 'actif')->get();
+    public function allevents()
+    {
+        // Récupérer tous les événements actifs
+        $evenements = Evenement::where('statut', 'actif')->get();
 
-    // Passer les événements à la vue
-    return view('welcome', compact('evenements'));
-}
+        // Passer les événements à la vue
+        return view('welcome', compact('evenements'));
+    }
 
+    public function showParticipationForm($id)
+    {
+        $evenement = Evenement::findOrFail($id);
+        return view('evenements.participer', compact('evenement'));
+    }
 }

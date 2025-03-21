@@ -10,8 +10,8 @@
                 <div class="mb-4">
                     <h4>Événement : {{ $evenement->titre }}</h4>
                     <p><strong>Description :</strong> {{ $evenement->description }}</p>
-                    <p><strong>Date de début :</strong> {{ $evenement->date_debut }}</p>
-                    <p><strong>Date de fin :</strong> {{ $evenement->date_fin }}</p>
+                    <p><strong>Date de début :</strong> {{ \Carbon\Carbon::parse($evenement->date_debut)->format('d/m/Y') }}</p>
+                    <p><strong>Date de fin :</strong> {{ \Carbon\Carbon::parse($evenement->date_fin)->format('d/m/Y') }}</p>
                     <p><strong>Statut :</strong> {{ $evenement->statut }}</p>
 
                     <!-- Liste des participants pour cet événement -->
@@ -24,6 +24,7 @@
                                 <thead>
                                     <tr>
                                         <th>Nom</th>
+                                        <th>Prénom</th>
                                         <th>Email</th>
                                         <th>Inscrit le</th>
                                     </tr>
@@ -31,9 +32,10 @@
                                 <tbody>
                                     @foreach ($evenement->participants as $participant)
                                         <tr>
-                                            <td>{{ $participant->user->name }}</td>
-                                            <td>{{ $participant->user->email }}</td>
-                                            <td>{{ $participant->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $participant->name ?? 'Non renseigné' }}</td>
+                                            <td>{{ $participant->last_name ?? 'Non renseigné' }}</td>
+                                            <td>{{ $participant->email ?? 'Non renseigné' }}</td>
+                                            <td>{{ $participant->pivot->created_at ? $participant->pivot->created_at->format('d/m/Y') : 'Non renseigné' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

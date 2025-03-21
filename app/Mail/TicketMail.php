@@ -4,47 +4,41 @@ namespace App\Mail;
 
 use App\Models\Evenement;
 use App\Models\Ticket;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class TicketMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $ticket;
     public $evenement;
-    public $nom;
-    public $prenom;
-    public $ticket; // Déclarez la propriété ticket
+    public $user;
 
     /**
-     * Créer une nouvelle instance de message.
+     * Create a new message instance.
      *
+     * @param Ticket $ticket
      * @param Evenement $evenement
-     * @param string $nom
-     * @param string $prenom
-     * @param string $ticket
-     * @return void
+     * @param User $user
      */
-    // Dans votre classe TicketMail :
-public function __construct(Ticket $ticket, Evenement $evenement)
-{
-    $this->ticket = $ticket;
-    $this->evenement = $evenement;
-}
+    public function __construct(Ticket $ticket, Evenement $evenement, User $user)
+    {
+        $this->ticket = $ticket;
+        $this->evenement = $evenement;
+        $this->user = $user;
+    }
 
-// Dans la méthode build :
-public function build()
-{
-    return $this->subject('Votre ticket pour l\'événement')
-                ->view('emails.ticket')
-                ->with([
-                    'ticket' => $this->ticket,
-                    'evenement' => $this->evenement,
-                ]);
-}
-
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->subject('Votre Ticket pour l\'Événement')
+                    ->view('emails.ticket');
+    }
 }
