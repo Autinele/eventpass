@@ -21,7 +21,7 @@
                                         d="M19.5313 9.82568C18.9966 9.82568 18.5626 10.2533 18.5626 10.7823C18.5626 14.3554 15.6186 17.2627 12.0005 17.2627C8.38136 17.2627 5.43743 14.3554 5.43743 10.7823C5.43743 10.2533 5.00345 9.82568 4.46872 9.82568C3.93398 9.82568 3.5 10.2533 3.5 10.7823C3.5 15.0873 6.79945 18.6413 11.0318 19.1186V21.0434C11.0318 21.5715 11.4648 22.0001 12.0005 22.0001C12.5352 22.0001 12.9692 21.5715 12.9692 21.0434V19.1186C17.2006 18.6413 20.5 15.0873 20.5 10.7823C20.5 10.2533 20.066 9.82568 19.5313 9.82568Z"
                                         fill="currentColor"></path>
                                 </svg>
-                                Offres d'emploi
+                                Dashboard
                             </a>
                         </div>
                     </div>
@@ -58,13 +58,12 @@
                                             class="text-center circle-progress-01 circle-progress circle-progress-primary"
                                             data-min-value="0" data-max-value="100" data-value="90" data-type="percent">
                                             <svg class="card-slie-arrow icon-24" width="24" viewBox="0 0 24 24">
-                                                <path fill="currentColor"
-                                                    d="M5,17.59L15.59,7H9V5H19V15H17V8.41L6.41,19L5,17.59Z" />
+                                                <path fill="currentColor" d="M5,17.59L15.59,7H9V5H19V15H17V8.41L6.41,19L5,17.59Z" />
                                             </svg>
                                         </div>
                                         <div class="progress-detail">
-                                            <p class="mb-2">Nombre d'alumni</p>
-                                            {{-- <h4 class="counter">{{ $nombreAlumni }}</h4> --}}
+                                            <p class="mb-2">Nombre d'événements actifs</p>
+                                            <h4 class="counter">{{ $nombreEvenementsActifs }}</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -81,8 +80,8 @@
                                             </svg>
                                         </div>
                                         <div class="progress-detail">
-                                            <p class="mb-2">Nombre de diplômés</p>
-                                            {{-- <h4 class="counter">{{ $nombreDiplomes }}</h4> --}}
+                                            <p class="mb-2">Nombre d'évènements expirés</p>
+                                            <h4 class="counter">{{ $expiredEventsCount }}</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -99,8 +98,8 @@
                                             </svg>
                                         </div>
                                         <div class="progress-detail">
-                                            <p class="mb-2">Nombres d'offres</p>
-                                            {{-- <h4 class="counter">{{ $nombreOffres }}</h4> --}}
+                                            <p class="mb-2">Nombres de participants</p>
+                                            <h4 class="counter">{{ $totalParticipantsCount }}</h4>
                                         </div>
                                     </div>
                                 </div>
@@ -117,8 +116,8 @@
                                             </svg>
                                         </div>
                                         <div class="progress-detail">
-                                            <p class="mb-2">Nombre d'offres postulées</p>
-                                            {{-- <h4 class="counter">{{ $nombreOffresPostulees }}</h4> --}}
+                                            <p class="mb-2">Nombre total d'utilisateurs</p>
+                                            <h4 class="counter">{{ $nombreUtilisateurs }}</h4>
                                         </div>
                                     </div>
                                 </div>

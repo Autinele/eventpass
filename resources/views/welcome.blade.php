@@ -20,7 +20,7 @@
             align-items: center;
             flex-direction: column;
             text-align: center;
-            background-color: #f0f0f0; /* Remplacez ici par la couleur souhaitée */
+            background-color: #f0f0f0;
         }
 
         .welcome-text {
@@ -90,7 +90,7 @@
             cursor: not-allowed;
         }
 
-        .error-message {
+        .alert {
             color: red;
             font-size: 2em;
             font-weight: bold;
@@ -123,6 +123,13 @@
             Bienvenue sur EventPass
         </div>
 
+        <!-- Affichage des erreurs -->
+        @if(session('error'))
+            <div class="alert">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="container">
             <div class="row">
                 @foreach ($evenements as $evenement)
@@ -152,17 +159,26 @@
         </div>
 
         @if (Auth::check())
-        @if (Auth::user()->role === 'admin')
-            <a href="{{ route('dashboard') }}" class="button-connexion top-right-button">Dashboard</a>
-        @else
-            <div class="welcome-text">
-                Accès réservé aux administrateurs uniquement.
-            </div>
-        @endif
-    @else
-        <a href="{{ route('login') }}" class="button-connexion top-right-button">Connexion</a>
+    @if (Auth::user()->role === 'admin')
+        <a href="{{ route('dashboard') }}" class="button-connexion top-right-button">Dashboard</a>
     @endif
+@else
+    <a href="{{ route('login') }}" class="button-connexion top-right-button">Connexion</a>
+@endif
+
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fermeture auto des alertes après 3 secondes
+            setTimeout(() => {
+                let alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.style.display = 'none';
+                }
+            }, 3000);
+        });
+    </script>
 </body>
 
 </html>

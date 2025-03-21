@@ -56,15 +56,15 @@
 
                                 <td>
                                     <!-- Bouton Voir -->
-                                    <a href="{{ route('evenements.show', $evenement->id) }}" class="btn btn-info btn-sm" title="Voir">
+                                    <a href="{{ route('evenements.show', ['hashedId' => $evenement->encodeId()]) }}" class="btn btn-info btn-sm" title="Voir">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <!-- Bouton Modifier -->
-                                    <a href="{{ route('evenements.edit', $evenement->id) }}" class="btn btn-primary btn-sm" title="Modifier">
+                                    <a href="{{ route('evenements.edit', ['hashedId' => $evenement->encodeId()]) }}" class="btn btn-primary btn-sm" title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <!-- Bouton Supprimer -->
-                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $evenement->id }})" title="Supprimer">
+                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('{{ $evenement->encodeId() }}')" title="Supprimer">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
