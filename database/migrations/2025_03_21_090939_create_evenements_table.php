@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('evenements', function (Blueprint $table) {
             $table->id();
+            $table->string('titre');
+        $table->text('description');
+        $table->datetime('date_debut');
+        $table->datetime('date_fin');
+        $table->enum('statut', ['actif', 'expiré'])->default('actif');
+        $table->integer('limite_participants');
+    $table->integer('participants_count')->default(0); 
+        $table->softDeletes();
             $table->timestamps();
         });
     }
